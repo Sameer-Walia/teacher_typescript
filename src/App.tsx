@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { ToastContainer } from 'react-toastify';
+import Header from './components/Header';
+import Siteroutes from './components/Siteroutes';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from './reduxslices/authSlice';
+import CommonHeader from './components/CommonHeader';
+import { AppDispatch, RootState } from './store';
+import Cookies from 'universal-cookie';
 
-function App() {
+function App()
+{
+  const dispatch = useDispatch<AppDispatch>()
+
+  const { isLoggedIn } = useSelector((state: RootState) => state.auth)
+  const usercokkie = new Cookies()
+
+
+  useEffect(() =>
+  {
+    const data = sessionStorage.getItem("userdata");
+    if (data)
+    {
+      dispatch(login(JSON.parse(data)));
+    }
+  }, []);
+
+  useEffect(() =>
+  {
+    const cookieUser = usercokkie.get("staysignin");
+    if (cookieUser)
+    {
+      dispatch(login(cookieUser))
+      sessionStorage.setItem("userdata", JSON.stringify(cookieUser));
+    }
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {
+        isLoggedIn === false ? <Header /> : <CommonHeader />
+      }
+      <Siteroutes />
+      <ToastContainer theme="colored" />
     </div>
   );
 }
